@@ -1,5 +1,5 @@
 sequenceDiagram
-participant Place
+participant user
 participant API
 participant BusinessLogic
 participant Database
