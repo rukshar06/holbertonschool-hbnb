@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Define a function for User class"""
+"""Define the User class."""
 
 import re
 from models.base_model import BaseModel
@@ -37,3 +37,27 @@ class User(BaseModel):
 
         self.places = []
         self.reviews = []
+
+    def update(self, user_data):
+        """Update user information."""
+
+        if 'first_name' in user_data:
+            if type(user_data['first_name']) is not str or not user_data['first_name'].strip():
+                raise ValueError("First name is required")
+            if len(user_data['first_name']) > 50:
+                raise ValueError("First name is too long")
+            self.first_name = user_data['first_name']
+
+        if 'last_name' in user_data:
+            if type(user_data['last_name']) is not str or not user_data['last_name'].strip():
+                raise ValueError("Last name is required")
+            if len(user_data['last_name']) > 50:
+                raise ValueError("Last name is too long")
+            self.last_name = user_data['last_name']
+
+        if 'email' in user_data:
+            if type(user_data['email']) is not str:
+                raise ValueError("Email must be a string")
+            if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", user_data['email']):
+                raise ValueError("Invalid email")
+            self.email = user_data['email']
