@@ -1,9 +1,11 @@
+
 #!/usr/bin/python3
 """Define the HBnB Facade."""
 
 from persistence.repository import InMemoryRepository
 from models.user import User
 from models.amenity import Amenity
+from models.place import Place
 
 
 class HBnBFacade:
@@ -12,6 +14,7 @@ class HBnBFacade:
     def __init__(self):
         self.user_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
+        self.place_repo = InMemoryRepository()
 
     # USER METHODS
 
@@ -63,20 +66,66 @@ class HBnBFacade:
     # PLACE METHODS
 
     def create_place(self, place_data):
-        # Placeholder for logic to create a place
-        pass
+        place_data = place_data.copy()
+
+        owner_id = place_data.pop('owner_id')
+        amenities_ids = place_data.pop('amenities', [])
+
+        owner = self.user_repo.get(owner_id)
+
+        if not owner:
+            raise ValueError("Owner not found")
+
+        place = Place(owner=owner, **place_data)
+
+        for amenity_id in amenities_ids:
+            amenity = self.amenity_repo.get(amenity_id)
+
+            if not amenity:
+                raise ValueError("Amenity not found")
+
+            place.add_amenity(amenity)
+
+        self.place_repo.add(place)
+        return place
 
     def get_place(self, place_id):
-        # Placeholder for logic to retrieve a place
-        pass
+        return self.place_repo.get(place_id)
 
     def get_all_places(self):
-        # Placeholder for logic to retrieve all places
-        pass
+        return self.place_repo.get_all()
 
     def update_place(self, place_id, place_data):
-        # Placeholder for logic to update a place
-        pass
+        place = self.place_repo.get(place_id)
+
+        if not place:
+            return None
+
+        place_data = place_data.copy()
+
+        if 'owner_id' in place_data:
+            owner_id = place_data.pop('owner_id')
+            owner = self.user_repo.get(owner_id)
+
+            if not owner:
+                raise ValueError("Owner not found")
+
+            place.owner = owner
+
+        if 'amenities' in place_data:
+            amenities_ids = place_data.pop('amenities')
+            place.amenities = []
+
+            for amenity_id in amenities_ids:
+                amenity = self.amenity_repo.get(amenity_id)
+
+                if not amenity:
+                    raise ValueError("Amenity not found")
+
+                place.add_amenity(amenity)
+
+        place.update(place_data)
+        return place
 
     # REVIEW METHODS
 
