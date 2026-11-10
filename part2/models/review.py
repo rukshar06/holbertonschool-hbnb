@@ -26,3 +26,25 @@ class Review(BaseModel):
         self.rating = rating
         self.place = place
         self.user = user
+
+    def update(self, review_data):
+        """Update review information."""
+
+        if 'text' in review_data:
+            text = review_data['text']
+
+            if type(text) is not str or not text:
+                raise ValueError("Text is required")
+
+            self.text = text
+
+        if 'rating' in review_data:
+            rating = review_data['rating']
+
+            if type(rating) is not int:
+                raise TypeError("Rating must be an integer")
+
+            if rating < 1 or rating > 5:
+                raise ValueError("Rating must be between 1 and 5")
+
+            self.rating = rating

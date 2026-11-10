@@ -1,4 +1,3 @@
-
 #!/usr/bin/python3
 """Define the HBnB Facade."""
 
@@ -6,6 +5,7 @@ from persistence.repository import InMemoryRepository
 from models.user import User
 from models.amenity import Amenity
 from models.place import Place
+from models.review import Review
 
 
 class HBnBFacade:
@@ -15,6 +15,7 @@ class HBnBFacade:
         self.user_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
         self.place_repo = InMemoryRepository()
+        self.review_repo = InMemoryRepository()
 
     # USER METHODS
 
@@ -130,25 +131,57 @@ class HBnBFacade:
     # REVIEW METHODS
 
     def create_review(self, review_data):
-        # Placeholder for logic to create a review
-        pass
+        review_data = review_data.copy()
+
+        user_id = review_data.pop('user_id')
+        place_id = review_data.pop('place_id')
+
+        user = self.user_repo.get(user_id)
+        place = self.place_repo.get(place_id)
+
+        if not user:
+            raise ValueError("User not found")
+
+        if not place:
+            raise ValueError("Place not found")
+
+        review = Review(user=user, place=place, **review_data)
+
+        self.review_repo.add(review)
+        place.add_review(review)
+
+        return review
 
     def get_review(self, review_id):
-        # Placeholder for logic to retrieve a review
-        pass
+        return self.review_repo.get(review_id)
 
     def get_all_reviews(self):
-        # Placeholder for logic to retrieve all reviews
-        pass
+        return self.review_repo.get_all()
 
     def get_reviews_by_place(self, place_id):
-        # Placeholder for logic to retrieve all reviews for a place
-        pass
+        place = self.place_repo.get(place_id)
+
+        if not place:
+            return None
+
+        return place.reviews
 
     def update_review(self, review_id, review_data):
-        # Placeholder for logic to update a review
-        pass
+        review = self.review_repo.get(review_id)
+
+        if not review:
+            return None
+
+        review.update(review_data)
+        return review
 
     def delete_review(self, review_id):
-        # Placeholder for logic to delete a review
-        pass
+        review = self.review_repo.get(review_id)
+
+        if not review:
+            return False
+
+        review.place.reviews.remove(review)
+        self.review_repo.delete(review_id)
+
+        return True
